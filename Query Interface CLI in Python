@@ -1,0 +1,19 @@
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///logs.db'
+db = SQLAlchemy(app)
+
+class Log(db.Model):
+    # Define the Log model (same as in the log ingestor)
+
+@app.route('/query', methods=['GET'])
+def query_logs():
+    filters = request.args.to_dict()
+    query = Log.query.filter_by(**filters).all()
+    result = [{'level': log.level, 'message': log.message, 'timestamp': str(log.timestamp)} for log in query]
+    return jsonify(result)
+
+if __name__ == '__main__':
+    app.run(port=4000)  # Run on a different port from the log ingestor
